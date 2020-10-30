@@ -15,5 +15,24 @@ https://github.com/tonyqus/npoi
 [Busy Developers' Guide to HSSF and XSSF Features](http://poi.apache.org/components/spreadsheet/quick-guide.html)
 
 
+### Sample Data 
+
+https://www.contextures.com/xlsampledata01.html
+
+https://www.wisdomaxis.com/technology/software/data/for-reports/
+
+https://github.com/benoitvallon/100-best-books/blob/master/books.json
+
+https://gist.github.com/nanotaboada/6396437
+
+https://gist.github.com/sanket143/5346f04575851a5228b8c5c1e99496af
+
+https://github.com/benoitvallon/100-best-books
+
+
+### Mapping 
+
+https://www.exceptionnotfound.net/mapping-datatables-and-datarows-to-objects-in-csharp-and-net-using-reflection/
+
 
 
