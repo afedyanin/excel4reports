@@ -30,9 +30,5 @@ https://gist.github.com/sanket143/5346f04575851a5228b8c5c1e99496af
 https://github.com/benoitvallon/100-best-books
 
 
-### Mapping 
-
-https://www.exceptionnotfound.net/mapping-datatables-and-datarows-to-objects-in-csharp-and-net-using-reflection/
-
 
 

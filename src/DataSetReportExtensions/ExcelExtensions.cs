@@ -87,13 +87,15 @@ namespace DataSetReportExtensions
 
         internal static void FillSingleCells(DataSet dataSet, XSSFWorkbook workBook)
         {
+            var ch = workBook.GetCreationHelper();
+
             foreach (ISheet sheet in workBook)
             {
                 foreach (IRow row in sheet)
                 {
                     foreach (ICell cell in row.Cells)
                     {
-                        FillCell(dataSet, cell);
+                        FillCell(dataSet, cell, ch);
                     }
                 }
             }
@@ -101,18 +103,19 @@ namespace DataSetReportExtensions
 
         internal static void FillNamedArea(DataTable dataTable, XSSFWorkbook workBook, IName areaName)
         {
+            var ch = workBook.GetCreationHelper();
             var (area, lastIndex) = GetAreaByName(workBook, areaName);
             var rowCount = dataTable.Rows.Count;
 
             if (rowCount == 0)
             {
-                CleanupRange(area, dataTable.Columns);
+                CleanupRange(area, dataTable.Columns, ch);
                 return;
             }
 
             if (rowCount == 1)
             {
-                FillRange(area, dataTable.Rows[0]);
+                FillRange(area, dataTable.Rows[0], ch);
                 return;
             }
 
@@ -125,7 +128,7 @@ namespace DataSetReportExtensions
                     (nextArea, nextIndex) = CopyArea(area, lastIndex + 1);
                 }
 
-                FillRange(area, dataTable.Rows[i]);
+                FillRange(area, dataTable.Rows[i], ch);
 
                 (area, lastIndex) = (nextArea, nextIndex);
             }
@@ -153,6 +156,12 @@ namespace DataSetReportExtensions
             for (int i = 0; i < rows.Length; i++)
             {
                 var row = rows[i];
+
+                if (row == null)
+                {
+                    continue;
+                }
+
                 var sheet = row.Sheet;
                 var newRowIdx = startIndex + i;
 
@@ -165,20 +174,20 @@ namespace DataSetReportExtensions
             return (resRows.ToArray(), startIndex + rows.Length - 1);
         }
 
-        internal static void FillRange(IRow[] rows, DataRow dataRow)
+        internal static void FillRange(IRow[] rows, DataRow dataRow, ICreationHelper helper)
         {
             IterateRange(
                 rows,
                 dataRow.Table.Columns,
-                (cell, colName) => SetCellValue(cell, dataRow[colName]));
+                (cell, colName) => SetCellValue(cell, dataRow[colName], helper));
         }
 
-        internal static void CleanupRange(IRow[] rows, DataColumnCollection columns)
+        internal static void CleanupRange(IRow[] rows, DataColumnCollection columns, ICreationHelper helper)
         {
             IterateRange(
                 rows,
                 columns,
-                (cell, colName) => SetCellValue(cell, null));
+                (cell, colName) => SetCellValue(cell, null, helper));
         }
 
         internal static void IterateRange(
@@ -188,6 +197,11 @@ namespace DataSetReportExtensions
         {
             foreach (var row in rows)
             {
+                if (row == null)
+                {
+                    continue;
+                }
+
                 foreach (var cell in row.Cells)
                 {
                     ProcessCell(cell, columns, action);
@@ -223,7 +237,7 @@ namespace DataSetReportExtensions
         /// <summary>
         /// Find template macro and replace it with actual value
         /// </summary>
-        internal static void FillCell(DataSet dataSet, ICell cell)
+        internal static void FillCell(DataSet dataSet, ICell cell, ICreationHelper helper)
         {
             if (cell.CellType != CellType.String)
             {
@@ -253,18 +267,18 @@ namespace DataSetReportExtensions
 
             if (dataTable.Rows.Count <= 0)
             {
-                SetCellValue(cell, null);
+                SetCellValue(cell, null, helper);
                 return;
             }
 
             var value = dataTable.Rows[0][colName];
-            SetCellValue(cell, value);
+            SetCellValue(cell, value, helper);
         }
 
         /// <summary>
         /// Set cell value with apropriate type
         /// </summary>
-        internal static void SetCellValue(ICell cell, object value)
+        internal static void SetCellValue(ICell cell, object value, ICreationHelper helper)
         {
             if (value == null)
             {
@@ -291,6 +305,12 @@ namespace DataSetReportExtensions
                     break;
                 case int db:
                     cell.SetCellValue(db);
+                    break;
+                case Uri uri:
+                    var link = helper.CreateHyperlink(HyperlinkType.Url);
+                    link.Address = uri.AbsoluteUri;
+                    cell.Hyperlink = link;
+                    cell.SetCellValue(uri.AbsoluteUri);
                     break;
                 default:
                     cell.SetCellValue(value.ToString());
