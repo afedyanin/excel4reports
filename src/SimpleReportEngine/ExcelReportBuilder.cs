@@ -9,19 +9,29 @@ using NPOI.SS.UserModel;
 using NPOI.SS.Util;
 using NPOI.XSSF.UserModel;
 
-[assembly: InternalsVisibleTo("DataSetReportExtensionsTests")]
+[assembly:InternalsVisibleTo("SimpleReportEngineTests")]
 
-namespace DataSetReportExtensions
+namespace SimpleReportEngine
 {
-    public static class ExcelExtensions
+    public static class ExcelReportBuilder 
     {
         private static readonly Regex _macro = new Regex("^\\s*%([a-zA-Z0-9.]*)%", RegexOptions.Compiled);
 
-        public static void FillExcelReport(this DataSet dataSet, string inFileName, string outFileName)
+        public static void BuildExcelReport(this DataSet dataSet, string templateFileName, string outFileName)
         {
-            if (string.IsNullOrEmpty(inFileName))
+            if (dataSet == null)
             {
-                throw new ArgumentNullException(nameof(inFileName));
+                throw new ArgumentNullException(nameof(dataSet));
+            }
+
+            if (string.IsNullOrEmpty(templateFileName))
+            {
+                throw new ArgumentNullException(nameof(templateFileName));
+            }
+
+            if (!File.Exists(templateFileName))
+            {
+                throw new ArgumentException($"Template file {templateFileName} is not found.");
             }
 
             if (string.IsNullOrEmpty(outFileName))
@@ -29,18 +39,13 @@ namespace DataSetReportExtensions
                 throw new ArgumentNullException(nameof(outFileName));
             }
 
-            if (!File.Exists(inFileName))
-            {
-                throw new ArgumentException($"Template file {inFileName} is not found.");
-            }
-
-            using var inStream = new FileStream(inFileName, FileMode.Open, FileAccess.Read);
+            using var inStream = new FileStream(templateFileName, FileMode.Open, FileAccess.Read);
             using var outStream = new FileStream(outFileName, FileMode.Create);
 
-            FillExcelReport(dataSet, inStream, outStream);
+            BuildExcelReport(dataSet, inStream, outStream);
         }
 
-        public static void FillExcelReport(this DataSet dataSet, Stream inStream, Stream outStream)
+        public static void BuildExcelReport(this DataSet dataSet, Stream inStream, Stream outStream)
         {
             if (dataSet == null)
             {
@@ -58,14 +63,12 @@ namespace DataSetReportExtensions
             }
 
             var workBook = new XSSFWorkbook(inStream);
-            FillWorkBook(dataSet, workBook);
-            workBook.Write(outStream);
-        }
 
-        internal static void FillWorkBook(DataSet dataSet, XSSFWorkbook workBook)
-        {
             FillNamedAreas(dataSet, workBook);
             FillSingleCells(dataSet, workBook);
+
+            workBook.Write(outStream);
+            workBook.Close();
         }
 
         internal static void FillNamedAreas(DataSet dataSet, XSSFWorkbook workBook)
@@ -80,14 +83,14 @@ namespace DataSetReportExtensions
                 if (dataSet.Tables.Contains(areaName.NameName))
                 {
                     var dataTable = dataSet.Tables[areaName.NameName];
-                    FillNamedArea(dataTable, workBook, areaName);
+                    FillNamedArea(dataTable, areaName, workBook);
                 }
             }
         }
 
         internal static void FillSingleCells(DataSet dataSet, XSSFWorkbook workBook)
         {
-            var ch = workBook.GetCreationHelper();
+            var creationHelper = workBook.GetCreationHelper();
 
             foreach (ISheet sheet in workBook)
             {
@@ -95,27 +98,33 @@ namespace DataSetReportExtensions
                 {
                     foreach (ICell cell in row.Cells)
                     {
-                        FillCell(dataSet, cell, ch);
+                        FillCell(dataSet, cell, creationHelper);
                     }
                 }
             }
         }
 
-        internal static void FillNamedArea(DataTable dataTable, XSSFWorkbook workBook, IName areaName)
+        internal static void FillNamedArea(DataTable dataTable, IName areaName, XSSFWorkbook workBook)
         {
-            var ch = workBook.GetCreationHelper();
+            if (dataTable == null)
+            {
+                return;
+            }
+
+            var creationHelper = workBook.GetCreationHelper();
+
             var (area, lastIndex) = GetAreaByName(workBook, areaName);
             var rowCount = dataTable.Rows.Count;
 
             if (rowCount == 0)
             {
-                CleanupRange(area, dataTable.Columns, ch);
+                FillRange(area, creationHelper, dataTable.Columns);
                 return;
             }
 
             if (rowCount == 1)
             {
-                FillRange(area, dataTable.Rows[0], ch);
+                FillRange(area, creationHelper, dataTable.Columns, dataTable.Rows[0]);
                 return;
             }
 
@@ -128,7 +137,7 @@ namespace DataSetReportExtensions
                     (nextArea, nextIndex) = CopyArea(area, lastIndex + 1);
                 }
 
-                FillRange(area, dataTable.Rows[i], ch);
+                FillRange(area, creationHelper, dataTable.Columns, dataTable.Rows[i]);
 
                 (area, lastIndex) = (nextArea, nextIndex);
             }
@@ -136,6 +145,11 @@ namespace DataSetReportExtensions
 
         internal static (IRow[] rows, int lastIndex) GetAreaByName(XSSFWorkbook workBook, IName name)
         {
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
             var aref = new AreaReference(name.RefersToFormula, SpreadsheetVersion.EXCEL2007);
             var resRows = new List<IRow>();
 
@@ -151,6 +165,11 @@ namespace DataSetReportExtensions
 
         internal static (IRow[] rows, int lastIndex) CopyArea(IRow[] rows, int startIndex)
         {
+            if (rows == null)
+            {
+                throw new ArgumentNullException(nameof(rows));
+            }
+
             var resRows = new List<IRow>();
 
             for (int i = 0; i < rows.Length; i++)
@@ -174,26 +193,19 @@ namespace DataSetReportExtensions
             return (resRows.ToArray(), startIndex + rows.Length - 1);
         }
 
-        internal static void FillRange(IRow[] rows, DataRow dataRow, ICreationHelper helper)
-        {
-            IterateRange(
-                rows,
-                dataRow.Table.Columns,
-                (cell, colName) => SetCellValue(cell, dataRow[colName], helper));
-        }
-
-        internal static void CleanupRange(IRow[] rows, DataColumnCollection columns, ICreationHelper helper)
+        internal static void FillRange(
+            IRow[] rows,
+            ICreationHelper creationHelper,
+            DataColumnCollection columns,
+            DataRow dataRow = null)
         {
             IterateRange(
                 rows,
                 columns,
-                (cell, colName) => SetCellValue(cell, null, helper));
+                (cell, colName) => SetCellValue(cell, dataRow?[colName], creationHelper));
         }
 
-        internal static void IterateRange(
-            IRow[] rows,
-            DataColumnCollection columns,
-            Action<ICell, string> action)
+        internal static void IterateRange(IRow[] rows, DataColumnCollection columns, Action<ICell, string> action)
         {
             foreach (var row in rows)
             {
@@ -223,7 +235,7 @@ namespace DataSetReportExtensions
 
             if (string.IsNullOrEmpty(cellValue))
             {
-                return; 
+                return;
             }
 
             var (_, colName) = GetColumnName(cellValue);
@@ -237,7 +249,7 @@ namespace DataSetReportExtensions
         /// <summary>
         /// Find template macro and replace it with actual value
         /// </summary>
-        internal static void FillCell(DataSet dataSet, ICell cell, ICreationHelper helper)
+        internal static void FillCell(DataSet dataSet, ICell cell, ICreationHelper creationHelper)
         {
             if (cell.CellType != CellType.String)
             {
@@ -267,55 +279,12 @@ namespace DataSetReportExtensions
 
             if (dataTable.Rows.Count <= 0)
             {
-                SetCellValue(cell, null, helper);
+                SetCellValue(cell, null, creationHelper);
                 return;
             }
 
             var value = dataTable.Rows[0][colName];
-            SetCellValue(cell, value, helper);
-        }
-
-        /// <summary>
-        /// Set cell value with apropriate type
-        /// </summary>
-        internal static void SetCellValue(ICell cell, object value, ICreationHelper helper)
-        {
-            if (value == null)
-            {
-                cell.SetCellValue(string.Empty);
-                return;
-            }
-
-            switch (value)
-            {
-                case bool bl:
-                    cell.SetCellValue(bl);
-                    break;
-                case DateTime dt:
-                    cell.SetCellValue(dt);
-                    break;
-                case double db:
-                    cell.SetCellValue(db);
-                    break;
-                case decimal db:
-                    cell.SetCellValue((double)db);
-                    break;
-                case long db:
-                    cell.SetCellValue(db);
-                    break;
-                case int db:
-                    cell.SetCellValue(db);
-                    break;
-                case Uri uri:
-                    var link = helper.CreateHyperlink(HyperlinkType.Url);
-                    link.Address = uri.AbsoluteUri;
-                    cell.Hyperlink = link;
-                    cell.SetCellValue(uri.AbsoluteUri);
-                    break;
-                default:
-                    cell.SetCellValue(value.ToString());
-                    break;
-            }
+            SetCellValue(cell, value, creationHelper);
         }
 
         /// <summary>
@@ -344,6 +313,49 @@ namespace DataSetReportExtensions
             }
 
             return (items[len - 2], items[len - 1]);
+        }
+
+        /// <summary>
+        /// Set cell value with apropriate type
+        /// </summary>
+        internal static void SetCellValue(ICell cell, object value, ICreationHelper creationHelper)
+        {
+            if (value == null)
+            {
+                cell.SetCellValue(string.Empty);
+                return;
+            }
+
+            switch (value)
+            {
+                case bool bl:
+                    cell.SetCellValue(bl);
+                    break;
+                case DateTime dt:
+                    cell.SetCellValue(dt);
+                    break;
+                case double db:
+                    cell.SetCellValue(db);
+                    break;
+                case decimal db:
+                    cell.SetCellValue((double)db);
+                    break;
+                case long db:
+                    cell.SetCellValue(db);
+                    break;
+                case int db:
+                    cell.SetCellValue(db);
+                    break;
+                case Uri uri:
+                    var link = creationHelper.CreateHyperlink(HyperlinkType.Url);
+                    link.Address = uri.AbsoluteUri;
+                    cell.Hyperlink = link;
+                    cell.SetCellValue(uri.AbsoluteUri);
+                    break;
+                default:
+                    cell.SetCellValue(value.ToString());
+                    break;
+            }
         }
     }
 }

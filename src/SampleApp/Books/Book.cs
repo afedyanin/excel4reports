@@ -1,6 +1,6 @@
 using System;
 
-namespace SampleApp.Model
+namespace SampleApp.Books
 {
     public class Book
     {

@@ -1,34 +1,29 @@
-# excel4reports
+# Simple Report Engine
 
-Excel Template Report Engine
+Simple template based report engine
 
-Based on [EPPlus Excel Template Report Engine](https://www.codeproject.com/Articles/1252390/EPPlus-Excel-Template-Report-Engine)
+## Excel Reports
 
-### NPOI 
+Based on this article [EPPlus Excel Template Report Engine](https://www.codeproject.com/Articles/1252390/EPPlus-Excel-Template-Report-Engine)
 
-https://github.com/tonyqus/npoi
+EPPlus replaced with [NPOI](https://github.com/tonyqus/npoi)
 
-[Getting Started with NPOI](https://github.com/nissl-lab/npoi/wiki/Getting-Started-with-NPOI)
+More info about NPOI
 
-[Generate XLS from template](https://github.com/nissl-lab/npoi/blob/master/examples/hssf/GenerateXlsFromXlsTemplate/Program.cs)
+- [Getting Started with NPOI](https://github.com/nissl-lab/npoi/wiki/Getting-Started-with-NPOI)
 
-[Busy Developers' Guide to HSSF and XSSF Features](http://poi.apache.org/components/spreadsheet/quick-guide.html)
+- [Generate XLS from template](https://github.com/nissl-lab/npoi/blob/master/examples/hssf/GenerateXlsFromXlsTemplate/Program.cs)
 
-
-### Sample Data 
-
-https://www.contextures.com/xlsampledata01.html
-
-https://www.wisdomaxis.com/technology/software/data/for-reports/
-
-https://github.com/benoitvallon/100-best-books/blob/master/books.json
-
-https://gist.github.com/nanotaboada/6396437
-
-https://gist.github.com/sanket143/5346f04575851a5228b8c5c1e99496af
-
-https://github.com/benoitvallon/100-best-books
+- [Busy Developers' Guide to HSSF and XSSF Features](http://poi.apache.org/components/spreadsheet/quick-guide.html)
 
 
+## Console Reports
+...
+
+## Sample Data Sources
+
+- [Orders sample data](https://www.contextures.com/xlsampledata01.html)
+
+- [Books sample data](https://gist.github.com/nanotaboada/6396437)
 
 

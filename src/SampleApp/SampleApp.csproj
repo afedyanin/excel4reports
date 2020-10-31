@@ -10,20 +10,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DataSetReportExtensions\DataSetReportExtensions.csproj" />
+    <ProjectReference Include="..\SimpleReportEngine\SimpleReportEngine.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Data\books.json">
+    <None Update="Books\books.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\orders.json">
+    <None Update="Orders\orders.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Reports\BooksTemplate.xlsx">
+    <None Update="Books\BooksTemplate.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Reports\OrdersTemplate.xlsx">
+    <None Update="Orders\OrdersTemplate.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

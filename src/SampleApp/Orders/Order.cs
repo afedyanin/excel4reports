@@ -1,6 +1,6 @@
 using System;
 
-namespace SampleApp.Model
+namespace SampleApp.Orders
 {
     public class Order
     {
