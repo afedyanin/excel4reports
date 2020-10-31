@@ -1,7 +1,6 @@
-using System;
 using System.Data;
 
-namespace DataSetReportExtensionsTests
+namespace SimpleReportEngineTests
 {
     public static class DataSetFactory
     {
