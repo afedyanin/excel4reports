@@ -11,12 +11,21 @@ namespace SampleApp.Orders
         private const string _ordersDataFile = "Orders\\orders.json";
         private const string _ordersTemplateFile = "Orders\\OrdersTemplate.xlsx";
         private const string _ordersReportFile = "Orders\\OrdersReport.xlsx";
+        private const string _ordersTextFile = "Orders\\OrdersReport.txt";
 
-        public static string Build()
+        public static string BuildExcel()
         {
             using var ds = CreateOrderDataSet(_ordersDataFile);
             ds.BuildExcelReport(_ordersTemplateFile, _ordersReportFile);
             return _ordersReportFile;
+        }
+
+        public static string BuildText()
+        {
+            using var ds = CreateOrderDataSet(_ordersDataFile);
+            var text = ds.Tables["myOrders"].BuildTextReport();
+            File.WriteAllText(_ordersTextFile, text);
+            return _ordersTextFile;
         }
 
         private static DataSet CreateOrderDataSet(string fileName)
