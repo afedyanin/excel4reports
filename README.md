@@ -26,7 +26,7 @@ Result:
 
 This project based on this article [EPPlus Excel Template Report Engine](https://www.codeproject.com/Articles/1252390/EPPlus-Excel-Template-Report-Engine)
 
-But EPPlus replaced with [NPOI](https://github.com/tonyqus/npoi)
+EPPlus replaced with [NPOI](https://github.com/tonyqus/npoi)
 
 More info about NPOI
 
