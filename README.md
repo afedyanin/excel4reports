@@ -4,6 +4,9 @@ Simple template based report engine
 
 ![Nuget](https://img.shields.io/nuget/v/SimpleReportEngine?style=plastic)
 
+[Nuget Package](https://www.nuget.org/packages/SimpleReportEngine/1.0.0)
+
+
 ## Excel Reports
 
 Generate Excel report file from DataSet object using template excel file.
