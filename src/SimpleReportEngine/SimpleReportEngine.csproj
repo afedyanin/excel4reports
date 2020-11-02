@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>Simple excel template based report engine</Description>
+    <PackageProjectUrl>https://github.com/afedyanin/excel4reports</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/afedyanin/excel4reports</RepositoryUrl>
+    <PackageTags>excel template reports reporting</PackageTags>
+    <Authors>Anatoly Fedyanin</Authors>
   </PropertyGroup>
 
   <ItemGroup>
