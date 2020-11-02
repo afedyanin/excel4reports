@@ -23,6 +23,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleReportEngine", "src\S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleReportEngineTests", "tests\SimpleReportEngineTests\SimpleReportEngineTests.csproj", "{728C2A16-20C5-48B0-9EAE-A1AAB5888AF1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{2D00AB72-92B3-4851-93B9-1AFF9BE4FC93}"
+	ProjectSection(SolutionItems) = preProject
+		pictures\books_report.png = pictures\books_report.png
+		pictures\books_template.png = pictures\books_template.png
+		pictures\books_txt.png = pictures\books_txt.png
+		pictures\orders_report.png = pictures\orders_report.png
+		pictures\orders_template.png = pictures\orders_template.png
+		pictures\orders_txt.png = pictures\orders_txt.png
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +59,7 @@ Global
 		{4F9EEB3E-FBC8-42AB-B8F8-505B5C71DF8C} = {9989F029-0E6C-4E91-AC23-9AD235696574}
 		{4C57595B-1663-405D-9551-0E69B80B3A70} = {9989F029-0E6C-4E91-AC23-9AD235696574}
 		{728C2A16-20C5-48B0-9EAE-A1AAB5888AF1} = {62582D4C-8764-446A-BB06-45E4730382EC}
+		{2D00AB72-92B3-4851-93B9-1AFF9BE4FC93} = {AE40E1A5-8BA3-4723-84F3-EF50A2EB2678}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {88725EC7-B3F2-4C58-BC1E-802A11D54C7D}
