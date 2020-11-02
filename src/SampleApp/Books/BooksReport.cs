@@ -11,12 +11,21 @@ namespace SampleApp.Books
         private const string _booksDataFile = "Books\\books.json";
         private const string _booksTemplateFile = "Books\\BooksTemplate.xlsx";
         private const string _booksReportFile = "Books\\BooksReport.xlsx";
+        private const string _booksTextFile = "Books\\BooksReport.txt";
 
-        public static string Build()
+        public static string BuildExcel()
         {
             using var ds = CreateBookDataSet(_booksDataFile);
             ds.BuildExcelReport(_booksTemplateFile, _booksReportFile);
             return _booksReportFile;
+        }
+
+        public static string BuildText()
+        {
+            using var ds = CreateBookDataSet(_booksDataFile);
+            var text = ds.Tables["myBooks"].BuildTextReport();
+            File.WriteAllText(_booksTextFile, text);
+            return _booksTextFile;
         }
 
         private static DataSet CreateBookDataSet(string fileName)
